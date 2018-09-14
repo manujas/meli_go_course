@@ -7,3 +7,8 @@ var Tweet string
 func PublishTweet(tweet string) {
 	Tweet = tweet
 }
+
+// GetTweet quiere un coment
+func GetTweet() string {
+	return Tweet
+}
