@@ -4,12 +4,13 @@ import (
 	"strconv"
 
 	"github.com/abiosoft/ishell"
-	"gitlab.grupoesfera.com.ar/CAP-00082-GrupoEsfera-GO/src/domain"
-	"gitlab.grupoesfera.com.ar/CAP-00082-GrupoEsfera-GO/src/service"
+	"github.com/manujas/meli_go_course/src/domain"
+	"github.com/manujas/meli_go_course/src/service"
 )
 
 func main() {
 
+	manager := service.NewTweetManager()
 	shell := ishell.New()
 	shell.SetPrompt("Tweeter >> ")
 	shell.Print("Type 'help' to know commands\n")
@@ -31,7 +32,7 @@ func main() {
 
 			tweet := domain.NewTweet(user, text)
 
-			id, err := service.PublishTweet(tweet)
+			id, err := manager.PublishTweet(tweet)
 
 			if err == nil {
 				c.Printf("Tweet sent with id: %v\n", id)
@@ -50,7 +51,7 @@ func main() {
 
 			defer c.ShowPrompt(true)
 
-			tweet := service.GetTweet()
+			tweet := manager.GetTweet()
 
 			c.Println(tweet)
 
@@ -65,7 +66,7 @@ func main() {
 
 			defer c.ShowPrompt(true)
 
-			tweets := service.GetTweets()
+			tweets := manager.GetTweets()
 
 			c.Println(tweets)
 
@@ -84,7 +85,7 @@ func main() {
 
 			id, _ := strconv.Atoi(c.ReadLine())
 
-			tweet := service.GetTweetById(id)
+			tweet := manager.GetTweetById(id)
 
 			c.Println(tweet)
 
@@ -103,7 +104,7 @@ func main() {
 
 			user := c.ReadLine()
 
-			count := service.CountTweetsByUser(user)
+			count := manager.CountTweetsByUser(user)
 
 			c.Println(count)
 

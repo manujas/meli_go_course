@@ -8,23 +8,22 @@ import (
 	"github.com/manujas/meli_go_course/src/domain"
 )
 
-// Tweet unico
-var Tweet *domain.Tweet
+// TweetManager estructura general del manager
+type TweetManager struct {
+	tweet         *domain.Tweet
+	tweets        []*domain.Tweet
+	userTweetsMap map[string][]*domain.Tweet
+}
 
-// Tweets quiere comentario
-var tweets []*domain.Tweet
-
-//
-var userTweetsMap map[string][]*domain.Tweet
-
-// InitializeService prepare all to work
-func InitializeService() {
-	tweets = make([]*domain.Tweet, 0)
-	userTweetsMap = make(map[string][]*domain.Tweet)
+// NewTweetManager constructor
+func NewTweetManager() *TweetManager {
+	manager := new(TweetManager)
+	manager.userTweetsMap = make(map[string][]*domain.Tweet)
+	return manager
 }
 
 // PublishTweet quiere un
-func PublishTweet(tweet *domain.Tweet) (uuid.UUID, error) {
+func (manager *TweetManager) PublishTweet(tweet *domain.Tweet) (uuid.UUID, error) {
 	if tweet.Text == "" {
 		return tweet.ID, fmt.Errorf("text is required")
 	}
@@ -37,25 +36,25 @@ func PublishTweet(tweet *domain.Tweet) (uuid.UUID, error) {
 		return tweet.ID, fmt.Errorf("text exceeds 140 characters")
 	}
 
-	Tweet = tweet
-	tweets = append(tweets, tweet)
-	userTweetsMap[tweet.User] = append(userTweetsMap[tweet.User], tweet)
+	manager.tweet = tweet
+	manager.tweets = append(manager.tweets, tweet)
+	manager.userTweetsMap[tweet.User] = append(manager.userTweetsMap[tweet.User], tweet)
 	return tweet.ID, nil
 }
 
 // GetTweet quiere un coment
-func GetTweet() *domain.Tweet {
-	return Tweet
+func (manager *TweetManager) GetTweet() *domain.Tweet {
+	return manager.tweet
 }
 
 // GetTweets quiere un coment
-func GetTweets() []*domain.Tweet {
-	return tweets
+func (manager TweetManager) GetTweets() []*domain.Tweet {
+	return manager.tweets
 }
 
 // GetTweetByID lalala
-func GetTweetByID(id uuid.UUID) *domain.Tweet {
-	for _, tweet := range tweets {
+func (manager *TweetManager) GetTweetByID(id uuid.UUID) *domain.Tweet {
+	for _, tweet := range manager.tweets {
 		if tweet.ID == id {
 			return tweet
 		}
@@ -65,11 +64,11 @@ func GetTweetByID(id uuid.UUID) *domain.Tweet {
 }
 
 // CountTweetsByUser get count
-func CountTweetsByUser(user string) int {
-	return len(GetTweetsByUser(user))
+func (manager *TweetManager) CountTweetsByUser(user string) int {
+	return len(manager.GetTweetsByUser(user))
 }
 
 // GetTweetsByUser get count
-func GetTweetsByUser(user string) []*domain.Tweet {
-	return userTweetsMap[user]
+func (manager *TweetManager) GetTweetsByUser(user string) []*domain.Tweet {
+	return manager.userTweetsMap[user]
 }
