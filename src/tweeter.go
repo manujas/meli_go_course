@@ -1,9 +1,11 @@
 package main
 
 import (
+	"strconv"
+
 	"github.com/abiosoft/ishell"
-	"github.com/manujas/meli_go_course/src/domain"
-	"github.com/manujas/meli_go_course/src/service"
+	"gitlab.grupoesfera.com.ar/CAP-00082-GrupoEsfera-GO/src/domain"
+	"gitlab.grupoesfera.com.ar/CAP-00082-GrupoEsfera-GO/src/service"
 )
 
 func main() {
@@ -29,10 +31,10 @@ func main() {
 
 			tweet := domain.NewTweet(user, text)
 
-			err := service.PublishTweet(tweet)
+			id, err := service.PublishTweet(tweet)
 
 			if err == nil {
-				c.Print("Tweet sent\n")
+				c.Printf("Tweet sent with id: %v\n", id)
 			} else {
 				c.Print("Error publishing tweet:", err)
 			}
@@ -43,12 +45,46 @@ func main() {
 
 	shell.AddCmd(&ishell.Cmd{
 		Name: "showTweet",
-		Help: "Shows a tweet",
+		Help: "Shows the last tweet",
 		Func: func(c *ishell.Context) {
 
 			defer c.ShowPrompt(true)
 
 			tweet := service.GetTweet()
+
+			c.Println(tweet)
+
+			return
+		},
+	})
+
+	shell.AddCmd(&ishell.Cmd{
+		Name: "showTweets",
+		Help: "Shows all the tweets",
+		Func: func(c *ishell.Context) {
+
+			defer c.ShowPrompt(true)
+
+			tweets := service.GetTweets()
+
+			c.Println(tweets)
+
+			return
+		},
+	})
+
+	shell.AddCmd(&ishell.Cmd{
+		Name: "showTweetById",
+		Help: "Shows the tweet with the provided id",
+		Func: func(c *ishell.Context) {
+
+			defer c.ShowPrompt(true)
+
+			c.Print("Type the id: ")
+
+			id, _ := strconv.Atoi(c.ReadLine())
+
+			tweet := service.GetTweetById(id)
 
 			c.Println(tweet)
 

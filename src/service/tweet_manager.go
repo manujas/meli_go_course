@@ -3,6 +3,8 @@ package service
 import (
 	"fmt"
 
+	"github.com/satori/go.uuid"
+
 	"github.com/manujas/meli_go_course/src/domain"
 )
 
@@ -18,22 +20,22 @@ func InitializeService() {
 }
 
 // PublishTweet quiere un
-func PublishTweet(tweet *domain.Tweet) error {
+func PublishTweet(tweet *domain.Tweet) (uuid.UUID, error) {
 	if tweet.Text == "" {
-		return fmt.Errorf("text is required")
+		return tweet.ID, fmt.Errorf("text is required")
 	}
 
 	if tweet.User == "" {
-		return fmt.Errorf("user is required")
+		return tweet.ID, fmt.Errorf("user is required")
 	}
 
 	if len(tweet.Text) > 140 {
-		return fmt.Errorf("text exceeds 140 characters")
+		return tweet.ID, fmt.Errorf("text exceeds 140 characters")
 	}
 
 	Tweet = tweet
 	tweets = append(tweets, tweet)
-	return nil
+	return tweet.ID, nil
 }
 
 // GetTweet quiere un coment
@@ -44,4 +46,15 @@ func GetTweet() *domain.Tweet {
 // GetTweets quiere un coment
 func GetTweets() []*domain.Tweet {
 	return tweets
+}
+
+// GetTweetByID lalala
+func GetTweetByID(id uuid.UUID) *domain.Tweet {
+	for _, tweet := range tweets {
+		if tweet.ID == id {
+			return tweet
+		}
+	}
+
+	return nil
 }

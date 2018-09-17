@@ -2,10 +2,13 @@ package domain
 
 import (
 	"time"
+
+	uuid "github.com/satori/go.uuid"
 )
 
 // Tweet structura
 type Tweet struct {
+	ID   uuid.UUID
 	User string
 	Text string
 	Date *time.Time
@@ -14,5 +17,6 @@ type Tweet struct {
 // NewTweet coment
 func NewTweet(tweetUser, tweetText string) *Tweet {
 	now := time.Now()
-	return &Tweet{tweetUser, tweetText, &now}
+	id, _ := uuid.NewV4()
+	return &Tweet{id, tweetUser, tweetText, &now}
 }

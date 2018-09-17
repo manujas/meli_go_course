@@ -3,6 +3,8 @@ package service_test
 import (
 	"testing"
 
+	"github.com/satori/go.uuid"
+
 	"github.com/manujas/meli_go_course/src/domain"
 	"github.com/manujas/meli_go_course/src/service"
 )
@@ -47,7 +49,7 @@ func TestTweetWithoutUserIsNotPublished(t *testing.T) {
 
 	// Operation
 	var err error
-	err = service.PublishTweet(tweet)
+	_, err = service.PublishTweet(tweet)
 
 	// Validation
 	if err != nil && err.Error() != "user is required" {
@@ -67,7 +69,7 @@ func TestTweetWithoutTextIsNotPublished(t *testing.T) {
 
 	// Operation
 	var err error
-	err = service.PublishTweet(tweet)
+	_, err = service.PublishTweet(tweet)
 
 	// Validation
 	if err == nil {
@@ -94,7 +96,7 @@ func TestTweetWhichExceeding140CharactersIsNotPublished(t *testing.T) {
 
 	// Operation
 	var err error
-	err = service.PublishTweet(tweet)
+	_, err = service.PublishTweet(tweet)
 
 	// Validation
 	if err == nil {
@@ -122,8 +124,8 @@ func TestCanPublishAndRetrieveMoreThanOneTweet(t *testing.T) {
 	secondTweet = domain.NewTweet(user, secondText)
 
 	// Operation
-	service.PublishTweet(tweet)
-	service.PublishTweet(secondTweet)
+	id1, _ := service.PublishTweet(tweet)
+	id2, _ := service.PublishTweet(secondTweet)
 
 	// Validation
 	publishedTweets := service.GetTweets()
@@ -137,17 +139,43 @@ func TestCanPublishAndRetrieveMoreThanOneTweet(t *testing.T) {
 	firstPublishedTweet := publishedTweets[0]
 	secondPublishedTweet := publishedTweets[1]
 
-	if !isValidTweet(t, firstPublishedTweet, user, text) {
+	if !isValidTweet(t, firstPublishedTweet, id1, user, text) {
 		return
 	}
 
-	if !isValidTweet(t, secondPublishedTweet, user, secondText) {
+	if !isValidTweet(t, secondPublishedTweet, id2, user, secondText) {
 		return
 	}
 
 }
 
-func isValidTweet(t *testing.T, tweet *domain.Tweet, user, text string) bool {
+func TestCanRetrieveTweetById(t *testing.T) {
+
+	// Initialization
+	service.InitializeService()
+
+	var tweet *domain.Tweet
+	var id uuid.UUID
+
+	user := "grupoesfera"
+	text := "This is my first tweet"
+
+	tweet = domain.NewTweet(user, text)
+
+	// Operation
+	id, _ = service.PublishTweet(tweet)
+
+	// Validation
+	publishedTweet := service.GetTweetByID(id)
+
+	isValidTweet(t, publishedTweet, id, user, text)
+}
+
+func isValidTweet(t *testing.T, tweet *domain.Tweet, id uuid.UUID, user, text string) bool {
+
+	if tweet.ID != id {
+		t.Errorf("Expected id is %v but was %v", id, tweet.ID)
+	}
 
 	if tweet.User != user && tweet.Text != text {
 		t.Errorf("Expected tweet is %s: %s \nbut is %s: %s",
