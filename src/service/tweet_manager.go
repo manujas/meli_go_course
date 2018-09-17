@@ -70,3 +70,15 @@ func CountTweetsByUser(user string) int {
 
 	return count
 }
+
+// GetTweetsByUser get count
+func GetTweetsByUser(user string) []*domain.Tweet {
+	userTweets := make([]*domain.Tweet, 0)
+	for _, tweet := range tweets {
+		if tweet.User == user {
+			userTweets = append(userTweets, tweet)
+		}
+	}
+
+	return userTweets
+}
