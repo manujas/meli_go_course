@@ -21,7 +21,7 @@ func TestPublishedTweetIsSaved(t *testing.T) {
 	service.PublishTweet(tweet)
 
 	// Validation
-	publishedTweet := service.GetTweets()[0]
+	publishedTweet := service.GetTweet()
 
 	if publishedTweet.User != user &&
 		publishedTweet.Text != text {

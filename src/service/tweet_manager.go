@@ -6,12 +6,15 @@ import (
 	"github.com/manujas/meli_go_course/src/domain"
 )
 
+// Tweet unico
+var Tweet *domain.Tweet
+
 // Tweets quiere comentario
-var Tweets []*domain.Tweet
+var tweets []*domain.Tweet
 
 // InitializeService prepare all to work
 func InitializeService() {
-	Tweets = make([]*domain.Tweet, 0)
+	tweets = make([]*domain.Tweet, 0)
 }
 
 // PublishTweet quiere un
@@ -28,11 +31,17 @@ func PublishTweet(tweet *domain.Tweet) error {
 		return fmt.Errorf("text exceeds 140 characters")
 	}
 
-	Tweets = append(Tweets, tweet)
+	Tweet = tweet
+	tweets = append(tweets, tweet)
 	return nil
+}
+
+// GetTweet quiere un coment
+func GetTweet() *domain.Tweet {
+	return Tweet
 }
 
 // GetTweets quiere un coment
 func GetTweets() []*domain.Tweet {
-	return Tweets
+	return tweets
 }
