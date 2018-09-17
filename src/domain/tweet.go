@@ -18,5 +18,11 @@ type Tweet struct {
 func NewTweet(tweetUser, tweetText string) *Tweet {
 	now := time.Now()
 	id, _ := uuid.NewV4()
+
 	return &Tweet{id, tweetUser, tweetText, &now}
+}
+
+// PrintableTweet return a printable versión of tweet
+func (tweet *Tweet) PrintableTweet() string {
+	return "@" + tweet.User + ": " + tweet.Text
 }
