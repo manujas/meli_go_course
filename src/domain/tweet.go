@@ -24,5 +24,9 @@ func NewTweet(tweetUser, tweetText string) *Tweet {
 
 // PrintableTweet return a printable versión of tweet
 func (tweet *Tweet) PrintableTweet() string {
+	return tweet.String()
+}
+
+func (tweet *Tweet) String() string {
 	return "@" + tweet.User + ": " + tweet.Text
 }
