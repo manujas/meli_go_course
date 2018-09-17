@@ -14,9 +14,13 @@ var Tweet *domain.Tweet
 // Tweets quiere comentario
 var tweets []*domain.Tweet
 
+//
+var userTweetsMap map[string][]*domain.Tweet
+
 // InitializeService prepare all to work
 func InitializeService() {
 	tweets = make([]*domain.Tweet, 0)
+	userTweetsMap = make(map[string][]*domain.Tweet)
 }
 
 // PublishTweet quiere un
@@ -35,6 +39,7 @@ func PublishTweet(tweet *domain.Tweet) (uuid.UUID, error) {
 
 	Tweet = tweet
 	tweets = append(tweets, tweet)
+	userTweetsMap[tweet.User] = append(userTweetsMap[tweet.User], tweet)
 	return tweet.ID, nil
 }
 
@@ -61,24 +66,10 @@ func GetTweetByID(id uuid.UUID) *domain.Tweet {
 
 // CountTweetsByUser get count
 func CountTweetsByUser(user string) int {
-	count := 0
-	for _, tweet := range tweets {
-		if tweet.User == user {
-			count++
-		}
-	}
-
-	return count
+	return len(GetTweetsByUser(user))
 }
 
 // GetTweetsByUser get count
 func GetTweetsByUser(user string) []*domain.Tweet {
-	userTweets := make([]*domain.Tweet, 0)
-	for _, tweet := range tweets {
-		if tweet.User == user {
-			userTweets = append(userTweets, tweet)
-		}
-	}
-
-	return userTweets
+	return userTweetsMap[user]
 }

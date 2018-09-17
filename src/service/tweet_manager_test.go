@@ -12,6 +12,8 @@ import (
 func TestPublishedTweetIsSaved(t *testing.T) {
 
 	// Initialization
+	service.InitializeService()
+
 	var tweet *domain.Tweet
 
 	user := "grupoesfera"
@@ -20,26 +22,19 @@ func TestPublishedTweetIsSaved(t *testing.T) {
 	tweet = domain.NewTweet(user, text)
 
 	// Operation
-	service.PublishTweet(tweet)
+	id, _ := service.PublishTweet(tweet)
 
 	// Validation
 	publishedTweet := service.GetTweet()
 
-	if publishedTweet.User != user &&
-		publishedTweet.Text != text {
-		t.Errorf("Expected tweet is %s: %s \nbut is %s: %s",
-			user, text, publishedTweet.User, publishedTweet.Text)
-	}
-
-	if publishedTweet.Date == nil {
-		t.Error("Expected date can't be nil")
-	}
-
+	isValidTweet(t, publishedTweet, id, user, text)
 }
 
 func TestTweetWithoutUserIsNotPublished(t *testing.T) {
 
 	// Initialization
+	service.InitializeService()
+
 	var tweet *domain.Tweet
 
 	var user string
@@ -60,6 +55,8 @@ func TestTweetWithoutUserIsNotPublished(t *testing.T) {
 func TestTweetWithoutTextIsNotPublished(t *testing.T) {
 
 	// Initialization
+	service.InitializeService()
+
 	var tweet *domain.Tweet
 
 	user := "grupoesfera"
@@ -85,6 +82,8 @@ func TestTweetWithoutTextIsNotPublished(t *testing.T) {
 func TestTweetWhichExceeding140CharactersIsNotPublished(t *testing.T) {
 
 	// Initialization
+	service.InitializeService()
+
 	var tweet *domain.Tweet
 
 	user := "grupoesfera"
@@ -108,7 +107,6 @@ func TestTweetWhichExceeding140CharactersIsNotPublished(t *testing.T) {
 		t.Error("Expected error is text exceeds 140 characters")
 	}
 }
-
 func TestCanPublishAndRetrieveMoreThanOneTweet(t *testing.T) {
 
 	// Initialization
@@ -124,8 +122,8 @@ func TestCanPublishAndRetrieveMoreThanOneTweet(t *testing.T) {
 	secondTweet = domain.NewTweet(user, secondText)
 
 	// Operation
-	id1, _ := service.PublishTweet(tweet)
-	id2, _ := service.PublishTweet(secondTweet)
+	firstId, _ := service.PublishTweet(tweet)
+	secondId, _ := service.PublishTweet(secondTweet)
 
 	// Validation
 	publishedTweets := service.GetTweets()
@@ -139,11 +137,11 @@ func TestCanPublishAndRetrieveMoreThanOneTweet(t *testing.T) {
 	firstPublishedTweet := publishedTweets[0]
 	secondPublishedTweet := publishedTweets[1]
 
-	if !isValidTweet(t, firstPublishedTweet, id1, user, text) {
+	if !isValidTweet(t, firstPublishedTweet, firstId, user, text) {
 		return
 	}
 
-	if !isValidTweet(t, secondPublishedTweet, id2, user, secondText) {
+	if !isValidTweet(t, secondPublishedTweet, secondId, user, secondText) {
 		return
 	}
 
