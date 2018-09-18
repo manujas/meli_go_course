@@ -3,75 +3,93 @@ package service
 import (
 	"fmt"
 
-	"github.com/satori/go.uuid"
-
 	"github.com/manujas/meli_go_course/src/domain"
 )
 
-// TweetManager estructura general del manager
 type TweetManager struct {
-	tweet         domain.Tweet
-	tweets        []domain.Tweet
-	userTweetsMap map[string][]domain.Tweet
+	tweets       []domain.Tweet
+	tweetsByUser map[string][]domain.Tweet
 }
 
-// NewTweetManager constructor
 func NewTweetManager() *TweetManager {
-	manager := new(TweetManager)
-	manager.userTweetsMap = make(map[string][]domain.Tweet)
-	return manager
+
+	tweetManager := new(TweetManager)
+
+	tweetManager.tweets = make([]domain.Tweet, 0)
+	tweetManager.tweetsByUser = make(map[string][]domain.Tweet)
+
+	return tweetManager
 }
 
-// PublishTweet quiere un
-func (manager *TweetManager) PublishTweet(tweet domain.Tweet) (uuid.UUID, error) {
-	text := tweet.GetText()
-	user := tweet.GetUser()
+func (manager *TweetManager) PublishTweet(tweetToPublish domain.Tweet) (int, error) {
 
-	if text == "" {
-		return tweet.GetId(), fmt.Errorf("text is required")
+	if tweetToPublish.GetUser() == "" {
+		return 0, fmt.Errorf("user is required")
 	}
 
-	if user == "" {
-		return tweet.GetId(), fmt.Errorf("user is required")
+	if tweetToPublish.GetText() == "" {
+		return 0, fmt.Errorf("text is required")
 	}
 
-	if len(text) > 140 {
-		return tweet.GetId(), fmt.Errorf("text exceeds 140 characters")
+	if len(tweetToPublish.GetText()) > 140 {
+		return 0, fmt.Errorf("text exceeds 140 characters")
 	}
 
-	manager.tweet = tweet
-	manager.tweets = append(manager.tweets, tweet)
-	manager.userTweetsMap[user] = append(manager.userTweetsMap[user], tweet)
-	return tweet.GetId(), nil
+	manager.tweets = append(manager.tweets, tweetToPublish)
+
+	tweetToPublish.SetId(len(manager.tweets))
+
+	userTweets := manager.tweetsByUser[tweetToPublish.GetUser()]
+	manager.tweetsByUser[tweetToPublish.GetUser()] = append(userTweets, tweetToPublish)
+
+	return tweetToPublish.GetId(), nil
 }
 
-// GetTweet quiere un coment
+// GetTweet returns the last published tweet
 func (manager *TweetManager) GetTweet() domain.Tweet {
-	return manager.tweet
+	lastTweetIndex := len(manager.tweets) - 1
+
+	return manager.tweets[lastTweetIndex]
 }
 
-// GetTweets quiere un coment
-func (manager TweetManager) GetTweets() []domain.Tweet {
+func (manager *TweetManager) GetTweets() []domain.Tweet {
 	return manager.tweets
 }
 
-// GetTweetById lalala
-func (manager *TweetManager) GetTweetById(id uuid.UUID) domain.Tweet {
+func (manager *TweetManager) GetTweetById(id int) domain.Tweet {
+
+	var tweet domain.Tweet
+
+	tweetIndex := 0
+
+	for tweetIndex < len(manager.tweets) && tweet == nil {
+
+		actualTweet := manager.tweets[tweetIndex]
+
+		if actualTweet.GetId() == id {
+			tweet = actualTweet
+		}
+
+		tweetIndex++
+	}
+
+	return tweet
+}
+
+func (manager *TweetManager) CountTweetsByUser(user string) int {
+
+	var count int
+
 	for _, tweet := range manager.tweets {
-		if tweet.GetId() == id {
-			return tweet
+		if tweet.GetUser() == user {
+			count++
 		}
 	}
 
-	return nil
+	return count
 }
 
-// CountTweetsByUser get count
-func (manager *TweetManager) CountTweetsByUser(user string) int {
-	return len(manager.GetTweetsByUser(user))
-}
-
-// GetTweetsByUser get count
 func (manager *TweetManager) GetTweetsByUser(user string) []domain.Tweet {
-	return manager.userTweetsMap[user]
+
+	return manager.tweetsByUser[user]
 }

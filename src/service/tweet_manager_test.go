@@ -3,8 +3,6 @@ package service_test
 import (
 	"testing"
 
-	"github.com/satori/go.uuid"
-
 	"github.com/manujas/meli_go_course/src/domain"
 	"github.com/manujas/meli_go_course/src/service"
 )
@@ -153,7 +151,7 @@ func TestCanRetrieveTweetById(t *testing.T) {
 	tweetManager := service.NewTweetManager()
 
 	var tweet domain.Tweet
-	var id uuid.UUID
+	var id int
 
 	user := "grupoesfera"
 	text := "This is my first tweet"
@@ -242,7 +240,7 @@ func TestCanRetrieveTheTweetsSentByAnUser(t *testing.T) {
 
 }
 
-func isValidTweet(t *testing.T, tweet domain.Tweet, id uuid.UUID, user, text string) bool {
+func isValidTweet(t *testing.T, tweet domain.Tweet, id int, user, text string) bool {
 
 	if tweet.GetId() != id {
 		t.Errorf("Expected id is %v but was %v", id, tweet.GetId())

@@ -1,10 +1,7 @@
 package domain_test
 
-import (
-	"testing"
-
-	"github.com/manujas/meli_go_course/src/domain"
-)
+import "testing"
+import "github.com/manujas/meli_go_course/src/domain"
 
 func TestTextTweetPrintsUserAndText(t *testing.T) {
 
