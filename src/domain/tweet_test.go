@@ -1,10 +1,7 @@
 package domain_test
 
-import (
-	"testing"
-
-	"github.com/manujas/meli_go_course/src/domain"
-)
+import "testing"
+import "gitlab.grupoesfera.com.ar/CAP-00082-GrupoEsfera-GO/src/domain"
 
 func TestTextTweetPrintsUserAndText(t *testing.T) {
 

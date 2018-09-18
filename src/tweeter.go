@@ -4,13 +4,19 @@ import (
 	"strconv"
 
 	"github.com/abiosoft/ishell"
-	"github.com/manujas/meli_go_course/src/domain"
-	"github.com/manujas/meli_go_course/src/service"
+	"gitlab.grupoesfera.com.ar/CAP-00082-GrupoEsfera-GO/src/domain"
+	"gitlab.grupoesfera.com.ar/CAP-00082-GrupoEsfera-GO/src/service"
 )
 
 func main() {
 
-	manager := service.NewTweetManager()
+	quit := make(chan bool)
+
+	fileTweetWriter := service.NewFileTweetWriter()
+	tweetWriter := service.NewChannelTweetWriter(fileTweetWriter)
+
+	tweetManager := service.NewTweetManager(tweetWriter)
+
 	shell := ishell.New()
 	shell.SetPrompt("Tweeter >> ")
 	shell.Print("Type 'help' to know commands\n")
@@ -30,9 +36,77 @@ func main() {
 
 			text := c.ReadLine()
 
-			tweet := domain.NewTweet(user, text)
+			tweet := domain.NewTextTweet(user, text)
 
-			id, err := manager.PublishTweet(tweet)
+			id, err := tweetManager.PublishTweet(tweet, quit)
+
+			if err == nil {
+				c.Printf("Tweet sent with id: %v\n", id)
+			} else {
+				c.Print("Error publishing tweet:", err)
+			}
+
+			return
+		},
+	})
+
+	shell.AddCmd(&ishell.Cmd{
+		Name: "publishImageTweet",
+		Help: "Publishes a tweet with an image",
+		Func: func(c *ishell.Context) {
+
+			defer c.ShowPrompt(true)
+
+			c.Print("Type your username: ")
+
+			user := c.ReadLine()
+
+			c.Print("Type your tweet: ")
+
+			text := c.ReadLine()
+
+			c.Print("Type the url of your image: ")
+
+			url := c.ReadLine()
+
+			tweet := domain.NewImageTweet(user, text, url)
+
+			id, err := tweetManager.PublishTweet(tweet, quit)
+
+			if err == nil {
+				c.Printf("Tweet sent with id: %v\n", id)
+			} else {
+				c.Print("Error publishing tweet:", err)
+			}
+
+			return
+		},
+	})
+
+	shell.AddCmd(&ishell.Cmd{
+		Name: "publishQuoteTweet",
+		Help: "Publishes a tweet with a quote",
+		Func: func(c *ishell.Context) {
+
+			defer c.ShowPrompt(true)
+
+			c.Print("Type your username: ")
+
+			user := c.ReadLine()
+
+			c.Print("Type your tweet: ")
+
+			text := c.ReadLine()
+
+			c.Print("Type the id of the tweet you want to quote: ")
+
+			id, _ := strconv.Atoi(c.ReadLine())
+
+			quoteTweet := tweetManager.GetTweetById(id)
+
+			tweet := domain.NewQuoteTweet(user, text, quoteTweet)
+
+			id, err := tweetManager.PublishTweet(tweet, quit)
 
 			if err == nil {
 				c.Printf("Tweet sent with id: %v\n", id)
@@ -51,7 +125,7 @@ func main() {
 
 			defer c.ShowPrompt(true)
 
-			tweet := manager.GetTweet()
+			tweet := tweetManager.GetTweet()
 
 			c.Println(tweet)
 
@@ -66,7 +140,7 @@ func main() {
 
 			defer c.ShowPrompt(true)
 
-			tweets := manager.GetTweets()
+			tweets := tweetManager.GetTweets()
 
 			c.Println(tweets)
 
@@ -85,7 +159,7 @@ func main() {
 
 			id, _ := strconv.Atoi(c.ReadLine())
 
-			tweet := manager.GetTweetById(id)
+			tweet := tweetManager.GetTweetById(id)
 
 			c.Println(tweet)
 
@@ -104,9 +178,28 @@ func main() {
 
 			user := c.ReadLine()
 
-			count := manager.CountTweetsByUser(user)
+			count := tweetManager.CountTweetsByUser(user)
 
 			c.Println(count)
+
+			return
+		},
+	})
+
+	shell.AddCmd(&ishell.Cmd{
+		Name: "showTweetsByUser",
+		Help: "Shows the tweets published by the user",
+		Func: func(c *ishell.Context) {
+
+			defer c.ShowPrompt(true)
+
+			c.Print("Type the user: ")
+
+			user := c.ReadLine()
+
+			tweets := tweetManager.GetTweetsByUser(user)
+
+			c.Println(tweets)
 
 			return
 		},
