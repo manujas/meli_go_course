@@ -205,7 +205,7 @@ func main() {
 		},
 	})
 
-	startServer()
+	go startServer()
 	shell.Run()
 
 }
