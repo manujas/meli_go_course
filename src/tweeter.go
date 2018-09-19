@@ -1,16 +1,21 @@
 package main
 
 import (
+	"fmt"
+	"net/http"
 	"strconv"
 
 	"github.com/abiosoft/ishell"
+	"github.com/gin-gonic/gin"
 	"github.com/manujas/meli_go_course/src/domain"
 	"github.com/manujas/meli_go_course/src/service"
 )
 
+var tweetManager *service.TweetManager
+
 func main() {
 
-	tweetManager := service.NewTweetManager()
+	tweetManager = service.NewTweetManager()
 
 	shell := ishell.New()
 	shell.SetPrompt("Tweeter >> ")
@@ -200,6 +205,74 @@ func main() {
 		},
 	})
 
+	startServer()
 	shell.Run()
 
+}
+
+func startServer() {
+	r := gin.Default()
+
+	r.GET("/", getTweets)
+	r.POST("/", createTweet)
+	r.GET("/tweet/:id", getTweetById)
+	r.GET("/tweets/:user", getTweetByUser)
+
+	r.Run()
+}
+
+func getTweets(c *gin.Context) {
+	c.JSON(http.StatusOK, tweetManager.GetTweets())
+}
+
+func createTweet(c *gin.Context) {
+	var rawTweet domain.RawTweet
+	if err := c.ShouldBindJSON(&rawTweet); err == nil {
+		fmt.Println(rawTweet)
+		tweet := createNewTweet(rawTweet)
+		if _, err := tweetManager.PublishTweet(tweet); err == nil {
+			c.JSON(http.StatusOK, gin.H{
+				"status": "twitted",
+			})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"status": "Error",
+				"Msg":    "No se pudo crear el tweet",
+			})
+		}
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": "Error",
+			"Msg":    err.Error(),
+		})
+	}
+
+}
+
+func createNewTweet(rt domain.RawTweet) domain.Tweet {
+	switch rt.TweetType {
+	case "image":
+		return domain.NewImageTweet(rt.User, rt.Text, rt.Image)
+	case "quote":
+		quotedTweet := tweetManager.GetTweetById(rt.IdQuotedTweet)
+		return domain.NewQuoteTweet(rt.User, rt.Text, quotedTweet)
+	default:
+		return domain.NewTextTweet(rt.User, rt.Text)
+	}
+}
+
+func getTweetById(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": "Error",
+			"Msg":    err.Error(),
+		})
+	}
+
+	c.JSON(http.StatusOK, tweetManager.GetTweetById(id))
+}
+
+func getTweetByUser(c *gin.Context) {
+	c.JSON(http.StatusOK, tweetManager.GetTweetsByUser(c.Param("user")))
 }
